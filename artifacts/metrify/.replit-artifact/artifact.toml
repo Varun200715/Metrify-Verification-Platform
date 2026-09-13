@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Metrify Verification Platform"
+description = "A full-stack digital verification platform for measuring instruments, connecting business owners, legal metrology officers, authorities, and citizens through registration, field inspection, offline sync, certificates, risk signals, and public QR verification."
+version = "1.0.0"
+id = "artifacts/metrify"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24866
+
+[services.development]
+run = "pnpm --filter @workspace/metrify run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/metrify", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/metrify/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24866"
+BASE_PATH = "/"

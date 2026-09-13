@@ -1,0 +1,1358 @@
+Build a complete, realistic, full-stack hackathon prototype called:
+
+METRIFY
+Smart Digital Verification Platform for Measuring Instruments
+
+============================================================
+CORE CONCEPT
+============================================================
+
+Metrify is a single digital platform with TWO connected interfaces:
+
+1. 🌐 METRIFY WEB PORTAL
+   Used by:
+   - Business Owners
+   - Authorities/Admin
+   - Citizens
+
+2. 📱 METRIFY OFFICER APP
+   Used by:
+   - Legal Metrology Officers (LMOs)
+
+Both interfaces must use the SAME backend and SAME PostgreSQL database.
+
+The main workflow is:
+
+Business registers instrument on Website
+        ↓
+Application enters Metrify system
+        ↓
+LMO receives inspection through Officer App
+        ↓
+LMO visits establishment
+        ↓
+AI OCR reads instrument details
+        ↓
+LMO performs physical inspection
+        ↓
+Inspection is saved
+        ↓
+If offline → store locally → sync later
+        ↓
+Verification record created
+        ↓
+Digital certificate generated
+        ↓
+Unique QR generated
+        ↓
+Citizen scans QR
+        ↓
+Citizen sees current verification status
+        ↓
+Inspection history / risk signals help authorities plan future inspections
+
+IMPORTANT:
+Metrify does NOT replace the physical inspection performed by an authorized Legal Metrology Officer.
+
+AI only assists with data extraction and cross-checking.
+The LMO remains responsible for the physical verification decision.
+
+============================================================
+TECHNOLOGY STACK
+============================================================
+
+WEB FRONTEND:
+- React.js
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- Lucide React
+
+OFFICER APP:
+- Build as a responsive PWA using the same React codebase where practical.
+- It must look and behave like a mobile field-inspection application.
+- Use PWA service worker.
+- Use IndexedDB through Dexie.js for offline storage.
+
+BACKEND:
+- Node.js
+- Express.js
+- REST APIs
+- JWT authentication
+- bcrypt password hashing
+
+DATABASE:
+- PostgreSQL
+- Prisma ORM
+
+AI/OCR:
+- Python OCR service OR simulated OCR service for MVP.
+- Structure the code so a real OCR model can be connected later.
+
+SECURITY:
+- HMAC verification tokens
+- JWT authentication
+- Role-based authorization
+- Helmet
+- CORS
+- Environment variables
+
+QR:
+- Generate unique QR codes for verified instruments.
+- QR opens the public verification page.
+
+============================================================
+PROJECT STRUCTURE
+============================================================
+
+Create:
+
+metrify/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── layouts/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── utils/
+│   │   ├── offline/
+│   │   └── App.jsx
+│   ├── public/
+│   └── package.json
+│
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── server.js
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── seed.js
+│   └── package.json
+│
+├── README.md
+└── .env.example
+
+IMPORTANT:
+Whenever creating a file or folder, provide the exact command used to create it.
+
+Whenever modifying a file, provide the COMPLETE updated file.
+
+Do not give partial code snippets for modified files.
+
+============================================================
+USER ROLES
+============================================================
+
+Create these roles:
+
+1. BUSINESS OWNER
+2. LEGAL METROLOGY OFFICER
+3. AUTHORITY / ADMIN
+4. CITIZEN
+
+Business, LMO and Admin require login.
+
+Citizen verification must NOT require login.
+
+============================================================
+AUTHENTICATION
+============================================================
+
+Create a professional login page.
+
+Role-based login.
+
+Demo credentials:
+
+Business:
+business@metrify.demo
+Metrify@123
+
+LMO:
+lmo@metrify.demo
+Metrify@123
+
+Admin:
+admin@metrify.demo
+Metrify@123
+
+Citizen:
+No login required.
+
+After login, redirect each user to the correct interface.
+
+============================================================
+DATABASE
+============================================================
+
+Use PostgreSQL with Prisma.
+
+Create these models:
+
+USER
+- id
+- name
+- email
+- passwordHash
+- role
+- phone
+- createdAt
+
+BUSINESS
+- id
+- userId
+- businessName
+- ownerName
+- address
+- district
+- state
+- latitude
+- longitude
+- registrationNumber
+- createdAt
+
+INSTRUMENT
+- id
+- instrumentId
+- businessId
+- instrumentType
+- manufacturer
+- model
+- serialNumber
+- capacity
+- accuracyClass
+- location
+- latitude
+- longitude
+- status
+- verificationDate
+- expiryDate
+- qrToken
+- createdAt
+- updatedAt
+
+VERIFICATION_APPLICATION
+- id
+- instrumentId
+- businessId
+- applicationNumber
+- applicationDate
+- status
+- assignedOfficerId
+- createdAt
+
+INSPECTION
+- id
+- instrumentId
+- officerId
+- inspectionDate
+- latitude
+- longitude
+- gpsVerified
+- inspectionResult
+- observations
+- photos
+- ocrData
+- syncStatus
+- createdAt
+
+OCR_RESULT
+- id
+- instrumentId
+- manufacturer
+- model
+- serialNumber
+- capacity
+- accuracyClass
+- confidence
+- mismatchDetected
+- createdAt
+
+CERTIFICATE
+- id
+- instrumentId
+- inspectionId
+- certificateNumber
+- issueDate
+- expiryDate
+- status
+- verificationHash
+- createdAt
+
+RISK_SIGNAL
+- id
+- instrumentId
+- score
+- level
+- reasons
+- calculatedAt
+
+FEEDBACK
+- id
+- instrumentId
+- category
+- message
+- createdAt
+
+AUDIT_LOG
+- id
+- userId
+- action
+- entityType
+- entityId
+- timestamp
+
+============================================================
+🌐 WEB PORTAL
+============================================================
+
+The web portal is the main management interface.
+
+It must support:
+
+BUSINESS OWNER
+- Registration
+- Instrument management
+- Applications
+- Certificates
+- Inspection history
+
+ADMIN
+- Instrument management
+- Application management
+- Officer management
+- Inspection planning
+- Risk indicators
+- Analytics
+- Audit logs
+
+CITIZEN
+- Public QR verification
+- Instrument status
+- Certificate information
+- Report issue
+
+============================================================
+BUSINESS OWNER WEBSITE
+============================================================
+
+After login show:
+
+METRIFY BUSINESS DASHBOARD
+
+Cards:
+
+Total Instruments
+Verified Instruments
+Pending Applications
+Expiring Soon
+
+Sidebar:
+
+Dashboard
+My Business
+My Instruments
+Register Instrument
+Applications
+Certificates
+Inspection History
+Profile
+Logout
+
+============================================================
+REGISTER INSTRUMENT
+============================================================
+
+Create a realistic government-style form.
+
+Fields:
+
+Business Name
+Instrument Type
+Manufacturer
+Model
+Serial Number
+Capacity
+Accuracy Class
+Installation Location
+State
+District
+Installation Date
+Upload Instrument Photo
+Upload Supporting Document
+
+Button:
+
+REGISTER INSTRUMENT
+
+After registration:
+
+Generate:
+
+Instrument ID:
+MTR-2026-000001
+
+Application Number:
+MTR-APP-2026-000001
+
+Status:
+
+PENDING VERIFICATION
+
+============================================================
+APPLICATION TRACKING
+============================================================
+
+Business owner can see:
+
+Application Number
+Instrument ID
+Date
+Status
+Assigned Officer
+Inspection Date
+Certificate Status
+
+Statuses:
+
+SUBMITTED
+ASSIGNED
+INSPECTION SCHEDULED
+INSPECTION COMPLETED
+VERIFIED
+REJECTED
+
+============================================================
+📱 OFFICER APP
+============================================================
+
+Create a separate mobile-first interface for LMOs.
+
+This must look like a real field inspection app.
+
+It can use the same React project but must have a dedicated mobile layout.
+
+Header:
+
+METRIFY
+Officer Portal
+
+Show:
+
+Officer Name
+Online / Offline status
+
+Main cards:
+
+Today's Inspections
+Pending
+Completed
+High Priority
+
+Bottom navigation:
+
+Home
+Inspections
+OCR
+Offline Queue
+Profile
+
+============================================================
+LMO INSPECTION
+============================================================
+
+Officer opens:
+
+ASSIGNED INSPECTIONS
+
+Each card shows:
+
+Instrument ID
+Business Name
+Instrument Type
+District
+Inspection Date
+Priority
+
+Example:
+
+MTR-2026-000001
+Sri Lakshmi Stores
+Digital Weighing Scale
+Madurai
+Priority: HIGH
+
+Button:
+
+START INSPECTION
+
+============================================================
+INSPECTION SCREEN
+============================================================
+
+Show instrument information:
+
+Instrument ID
+Business
+Manufacturer
+Model
+Serial Number
+Capacity
+Current Status
+Previous Verification
+
+Then:
+
+1. Capture Instrument Photo
+2. Capture Nameplate Photo
+3. AI OCR
+4. GPS Location
+5. Inspection Observations
+6. Inspection Result
+
+Result:
+
+PASS
+FAIL
+REQUIRES REVIEW
+
+Button:
+
+SUBMIT INSPECTION
+
+============================================================
+AI OCR
+============================================================
+
+Create an OCR screen.
+
+Officer selects/captures nameplate image.
+
+Show:
+
+AI OCR ANALYSIS
+
+Manufacturer
+Model
+Serial Number
+Capacity
+Accuracy Class
+
+Example:
+
+Manufacturer
+Example Instruments
+97% confidence
+
+Serial Number
+WT-45892
+94% confidence
+
+Capacity
+30 kg
+98% confidence
+
+Then compare:
+
+REGISTERED DATA
+vs
+OCR DATA
+
+Example:
+
+Serial Number
+Registered: WT-45892
+OCR: WT-45892
+
+✓ MATCH
+
+If mismatch:
+
+⚠ WARNING
+
+"Instrument details do not match the registered record."
+
+Allow LMO to review/edit OCR result.
+
+IMPORTANT:
+OCR is only an assistant.
+It must NOT automatically decide legal compliance.
+
+For the hackathon, simulated OCR is acceptable.
+
+============================================================
+📍 GPS / GEO-TAGGING
+============================================================
+
+During inspection:
+
+Show:
+
+Inspection Location
+GPS Captured
+
+Example:
+
+Registered Location:
+Madurai Market
+
+Current Location:
+Madurai Market
+
+Status:
+
+✓ LOCATION MATCHED
+
+If mismatch:
+
+⚠ LOCATION MISMATCH
+
+Do not claim GPS is a perfect anti-fraud mechanism.
+
+============================================================
+📴 OFFLINE-FIRST MODE
+============================================================
+
+This is a CORE FEATURE.
+
+If internet connection is unavailable:
+
+Show:
+
+OFFLINE MODE
+
+Officer can still:
+
+- Open assigned inspection
+- Capture data
+- Capture/select photos
+- Run demo OCR
+- Enter observations
+- Record inspection result
+- Save inspection
+
+Store inspection in IndexedDB using Dexie.js.
+
+Show:
+
+✓ INSPECTION SAVED LOCALLY
+
+Create:
+
+OFFLINE QUEUE
+
+Example:
+
+2 Inspections Waiting for Sync
+
+When internet returns:
+
+Automatically synchronize data with backend.
+
+Show:
+
+✓ SYNC COMPLETED
+
+This functionality must actually work.
+
+============================================================
+VERIFICATION
+============================================================
+
+After LMO submits PASS:
+
+Create verification record.
+
+Generate:
+
+Certificate Number:
+LMO/2026/000001
+
+Instrument ID:
+MTR-2026-000001
+
+Verification Date:
+Current date
+
+Valid Until:
+Demo expiry date
+
+Status:
+
+VERIFIED
+
+Generate an HMAC verification token.
+
+============================================================
+DIGITAL CERTIFICATE
+============================================================
+
+Create a professional certificate page.
+
+METRIFY
+
+DIGITAL VERIFICATION CERTIFICATE
+
+Certificate Number
+Instrument ID
+Business
+Instrument Type
+Manufacturer
+Model
+Serial Number
+Verification Date
+Valid Until
+Status
+
+Generate QR code.
+
+Button:
+
+VERIFY CERTIFICATE
+
+Optional:
+
+DOWNLOAD CERTIFICATE
+
+============================================================
+🔲 QR PUBLIC VERIFICATION
+============================================================
+
+Every verified instrument gets a unique QR.
+
+QR opens:
+
+/verify/:instrumentId
+
+No login required.
+
+Show:
+
+METRIFY
+LEGAL METROLOGY VERIFICATION
+
+✓ VERIFIED
+
+Instrument ID:
+MTR-2026-000001
+
+Instrument:
+Digital Weighing Scale
+
+Manufacturer:
+Example Instruments
+
+Model:
+DS-30
+
+Serial Number:
+WT-45892
+
+Verification Date:
+13 September 2026
+
+Valid Until:
+13 September 2027
+
+Certificate:
+LMO/2026/000001
+
+Last Inspection:
+13 September 2026
+
+Add:
+
+REPORT AN ISSUE
+
+Do not expose sensitive personal/business information.
+
+============================================================
+👤 CITIZEN VERIFICATION
+============================================================
+
+Create a clean public page:
+
+VERIFY A MEASURING INSTRUMENT
+
+[ Scan QR ]
+
+OR
+
+[ Enter Instrument ID ]
+
+If QR scanner is difficult to implement:
+
+Allow manual Instrument ID entry.
+
+Example:
+
+MTR-2026-000001
+
+Then show verification result.
+
+============================================================
+📘 INSTRUMENT DIGITAL PASSPORT
+============================================================
+
+This is one of the MAIN Metrify features.
+
+Create a page:
+
+INSTRUMENT DIGITAL PASSPORT
+
+Show:
+
+Instrument ID
+Business
+Instrument Type
+Manufacturer
+Model
+Serial Number
+Capacity
+Current Status
+
+Then show lifecycle timeline:
+
+REGISTERED
+↓
+APPLICATION SUBMITTED
+↓
+INSPECTION
+↓
+VERIFIED
+↓
+QR ISSUED
+↓
+CONSUMER CHECK
+↓
+NEXT INSPECTION
+
+Show complete inspection history.
+
+Example:
+
+13 Sep 2026
+Initial Verification
+PASS
+
+15 Mar 2027
+Routine Inspection
+PASS
+
+This demonstrates that Metrify maintains the instrument's lifecycle instead of treating every verification as an isolated event.
+
+============================================================
+🏛️ ADMIN DASHBOARD
+============================================================
+
+Create a professional authority dashboard.
+
+Cards:
+
+Total Instruments
+Verified
+Pending
+Expired
+High Priority
+Inspections Due
+
+Charts:
+
+- Instruments by status
+- Verification trends
+- District-wise instruments
+- Inspection results
+- Risk distribution
+
+Tables:
+
+Recent Inspections
+Pending Applications
+Expiring Certificates
+High Priority Instruments
+
+============================================================
+SMART INSPECTION PLANNING
+============================================================
+
+Create:
+
+INSPECTION PLANNING
+
+Columns:
+
+Instrument ID
+Business
+District
+Last Inspection
+Expiry
+Risk Level
+Priority
+
+Filters:
+
+All
+High
+Medium
+Low
+Expiring Soon
+
+Button:
+
+PRIORITIZE INSPECTIONS
+
+Use a transparent rule-based demo algorithm.
+
+Do NOT claim this is an official government risk score.
+
+Label it:
+
+INSPECTION RISK SIGNAL — PROTOTYPE
+
+============================================================
+RISK SIGNAL
+============================================================
+
+Calculate demo risk using:
+
+- Previous failed inspection
+- Expiry approaching
+- OCR mismatch
+- Repeated issue reports
+- Pending inspections
+
+Levels:
+
+LOW
+MEDIUM
+HIGH
+
+Example:
+
+HIGH RISK
+
+Reasons:
+• Previous failed inspection
+• Verification expiry approaching
+• Recent issue report
+
+This is an assistance signal for inspection planning.
+
+It does not replace the authority's decision.
+
+============================================================
+🗺️ INSPECTION MAP
+============================================================
+
+Create a map showing demo instrument locations.
+
+Markers:
+
+Green = Verified
+Yellow = Due Soon
+Red = High Priority
+
+Click marker to show:
+
+Business
+Instrument
+Status
+Last Inspection
+Risk Level
+
+Use Leaflet if practical.
+
+If real map integration causes problems, create a realistic simulated map.
+
+============================================================
+PUBLIC FEEDBACK
+============================================================
+
+On public verification page:
+
+REPORT AN ISSUE
+
+Categories:
+
+Suspected inaccurate measurement
+Damaged instrument
+QR/tag issue
+Other
+
+Message box.
+
+Submit.
+
+After submission:
+
+"Feedback submitted for authority review."
+
+IMPORTANT:
+Feedback must NOT automatically change legal verification status.
+
+Feedback can contribute to the prototype risk signal.
+
+============================================================
+AUDIT LOG
+============================================================
+
+Admin-only page:
+
+AUDIT LOGS
+
+Columns:
+
+User
+Action
+Entity
+Date/Time
+
+Examples:
+
+Business registered instrument
+LMO started inspection
+LMO submitted inspection
+Certificate generated
+Citizen submitted feedback
+Admin updated record
+
+============================================================
+DATABASE + API
+============================================================
+
+Create real REST APIs.
+
+AUTH:
+POST /api/auth/login
+POST /api/auth/register
+
+BUSINESSES:
+GET /api/businesses
+GET /api/businesses/:id
+POST /api/businesses
+
+INSTRUMENTS:
+GET /api/instruments
+GET /api/instruments/:id
+POST /api/instruments
+PUT /api/instruments/:id
+
+APPLICATIONS:
+GET /api/applications
+POST /api/applications
+PUT /api/applications/:id
+
+INSPECTIONS:
+GET /api/inspections
+GET /api/inspections/:id
+POST /api/inspections
+PUT /api/inspections/:id
+
+OCR:
+POST /api/ocr/analyze
+
+CERTIFICATES:
+GET /api/certificates
+GET /api/certificates/:id
+POST /api/certificates
+
+PUBLIC:
+GET /api/public/verify/:instrumentId
+
+RISK:
+GET /api/risk
+GET /api/risk/:instrumentId
+
+FEEDBACK:
+POST /api/feedback
+GET /api/feedback
+
+DASHBOARDS:
+GET /api/dashboard/business
+GET /api/dashboard/lmo
+GET /api/dashboard/admin
+
+AUDIT:
+GET /api/audit-logs
+
+============================================================
+DESIGN
+============================================================
+
+Make the application look like a realistic professional Indian government digital platform.
+
+Do NOT copy eMaap's exact UI or branding.
+
+Use:
+
+- White background
+- Navy / blue primary color
+- Subtle teal accents
+- Clean cards
+- Professional tables
+- Clear status badges
+- Simple icons
+- Consistent spacing
+- Responsive design
+
+WEB:
+
+Desktop-first professional dashboard.
+
+OFFICER APP:
+
+Mobile-first field inspection interface.
+
+CITIZEN:
+
+Very simple public verification page.
+
+Avoid excessive animations.
+
+Avoid giant graphics.
+
+Prioritize usability and realism.
+
+============================================================
+DEMO DATA
+============================================================
+
+Seed PostgreSQL with realistic fictional data.
+
+Create:
+
+5 businesses
+15 instruments
+10 applications
+10 inspections
+8 certificates
+10 risk signals
+5 feedback records
+
+Use fictional businesses such as:
+
+Sri Lakshmi Stores
+Annapoorna Supermarket
+Metro Wholesale
+Green Valley Traders
+Chennai Market Traders
+
+Use fictional instruments.
+
+Do not use real people's personal information.
+
+============================================================
+BUILT NOW VS PLANNED
+============================================================
+
+Clearly distinguish between what is demonstrated and what is future scope.
+
+BUILT NOW:
+
+✓ Web portal
+✓ Officer PWA
+✓ Instrument registration
+✓ Offline-first inspection
+✓ IndexedDB offline queue
+✓ Simulated AI OCR
+✓ OCR cross-check
+✓ GPS capture/demo
+✓ HMAC verification token
+✓ Digital verification record
+✓ QR public verification
+✓ Instrument Digital Passport
+✓ Inspection history
+✓ Basic risk signal
+✓ Role-based dashboards
+✓ PostgreSQL database for the working prototype
+
+PLANNED:
+
+→ Production cloud deployment
+→ Integration with state Legal Metrology portals
+→ Advanced automated risk scheduling
+→ Industrial NFC hardware
+→ BLE/RS-232 instrument integration
+→ Production-grade AI/OCR
+→ Government identity/e-sign integrations
+
+Do not visually present planned features as already implemented.
+
+============================================================
+IMPORTANT CLAIMS
+============================================================
+
+DO NOT SAY:
+
+"Metrify replaces eMaap."
+
+Instead:
+
+"Metrify complements existing Legal Metrology systems with an instrument-level digital identity, field inspection and public verification layer."
+
+DO NOT SAY:
+
+"AI verifies the instrument."
+
+Say:
+
+"AI assists the officer by extracting and cross-checking instrument details."
+
+DO NOT SAY:
+
+"QR codes are automatically tamper-proof."
+
+Say:
+
+"Each QR is uniquely linked to the instrument's verification record."
+
+DO NOT SAY:
+
+"Risk score determines which merchant is illegal."
+
+Say:
+
+"Risk signals help authorities prioritize inspections."
+
+DO NOT say:
+
+"GPS completely prevents fraud."
+
+Say:
+
+"GPS tagging helps confirm that the inspection was performed at the registered location."
+
+============================================================
+MOST IMPORTANT LIVE DEMO
+============================================================
+
+The complete prototype demonstration must work like this:
+
+1. Open Metrify Website.
+
+2. Business logs in.
+
+3. Register a weighing scale.
+
+4. Show generated Instrument ID.
+
+5. Show application status:
+   PENDING VERIFICATION
+
+6. Log out.
+
+7. Open Officer App.
+
+8. LMO logs in.
+
+9. Show assigned inspection.
+
+10. Open the instrument.
+
+11. Capture/upload nameplate image.
+
+12. Run AI OCR.
+
+13. Show OCR vs registered data.
+
+14. Show GPS location.
+
+15. Turn internet OFF / simulate offline mode.
+
+16. Complete inspection.
+
+17. Show:
+   "Inspection Saved Offline"
+
+18. Restore internet.
+
+19. Show:
+   "Inspection Synced Successfully"
+
+20. Mark:
+   PASS
+
+21. Generate verification certificate.
+
+22. Generate QR.
+
+23. Open Citizen Verification.
+
+24. Scan/open QR.
+
+25. Show:
+
+   ✓ VERIFIED
+
+26. Show Instrument Digital Passport.
+
+27. Show inspection history.
+
+28. Submit a citizen issue report.
+
+29. Open Admin Dashboard.
+
+30. Show the new feedback/risk signal.
+
+31. Open Inspection Planning.
+
+32. Show how the system helps prioritize inspections.
+
+This should be the MAIN STORY of the prototype.
+
+============================================================
+FINAL OUTPUT REQUIRED
+============================================================
+
+After generating the project, provide:
+
+1. Complete folder structure
+2. Exact commands to create folders
+3. Exact commands to create files
+4. Installation commands
+5. PostgreSQL setup
+6. Prisma migration commands
+7. Prisma seed command
+8. Backend start command
+9. Frontend start command
+10. PWA setup instructions
+11. Environment variable setup
+12. Demo login credentials
+13. Exact URL for Web Portal
+14. Exact URL/path for Officer App
+15. Exact URL format for Citizen QR Verification
+16. Complete live demo steps
+17. Troubleshooting instructions
+
+IMPORTANT:
+
+The project must actually run.
+
+Do not create static mock screens only.
+
+Buttons must perform real actions.
+
+Forms must save to the database.
+
+API calls must connect frontend and backend.
+
+Offline inspections must actually be stored in IndexedDB.
+
+Offline data must actually sync when connectivity returns.
+
+QR verification must actually open the corresponding instrument record.
+
+Use simulated OCR only where a real OCR service is impractical.
+
+Do not leave core features as TODOs.
+
+Whenever modifying a file, provide the COMPLETE updated file.
+
+Whenever creating a folder/file, provide the exact creation command.

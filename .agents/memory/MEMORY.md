@@ -1,0 +1,1 @@
+- [Generated client typings](generated-client-dom-iterable.md) — Orval fetch clients need DOM iterable typings for Headers.entries().

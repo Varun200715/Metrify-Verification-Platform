@@ -1,22 +1,29 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Metrify digital verification platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: dashboard
+  - name: instruments
+  - name: applications
+  - name: inspections
+  - name: certificates
+  - name: public
+  - name: risk
+  - name: feedback
+  - name: audit
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +31,711 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in with a demo role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          description: Invalid credentials
+  /auth/register:
+    post:
+      operationId: registerBusiness
+      tags: [auth]
+      summary: Register a business owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+  /dashboard/business:
+    get:
+      operationId: getBusinessDashboard
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Business dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessDashboard"
+  /dashboard/lmo:
+    get:
+      operationId: getLmoDashboard
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Officer dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LmoDashboard"
+  /dashboard/admin:
+    get:
+      operationId: getAdminDashboard
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Authority dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+  /instruments:
+    get:
+      operationId: listInstruments
+      tags: [instruments]
+      parameters:
+        - $ref: "#/components/parameters/StatusQuery"
+      responses:
+        "200":
+          description: Instruments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Instrument"
+    post:
+      operationId: createInstrument
+      tags: [instruments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstrumentInput"
+      responses:
+        "201":
+          description: Instrument and application created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instrument"
+  /instruments/{id}:
+    get:
+      operationId: getInstrument
+      tags: [instruments]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Instrument
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstrumentDetail"
+    put:
+      operationId: updateInstrument
+      tags: [instruments]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstrumentUpdate"
+      responses:
+        "200":
+          description: Updated instrument
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instrument"
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [applications]
+      responses:
+        "200":
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+    post:
+      operationId: createApplication
+      tags: [applications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+  /applications/{id}:
+    put:
+      operationId: updateApplication
+      tags: [applications]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationUpdate"
+      responses:
+        "200":
+          description: Application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+  /inspections:
+    get:
+      operationId: listInspections
+      tags: [inspections]
+      responses:
+        "200":
+          description: Inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+    post:
+      operationId: createInspection
+      tags: [inspections]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionInput"
+      responses:
+        "201":
+          description: Inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+  /inspections/{id}:
+    get:
+      operationId: getInspection
+      tags: [inspections]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+    put:
+      operationId: updateInspection
+      tags: [inspections]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionUpdate"
+      responses:
+        "200":
+          description: Inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+  /ocr/analyze:
+    post:
+      operationId: analyzeOcr
+      tags: [inspections]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OcrInput"
+      responses:
+        "200":
+          description: OCR result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OcrResult"
+  /certificates:
+    get:
+      operationId: listCertificates
+      tags: [certificates]
+      responses:
+        "200":
+          description: Certificates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certificate"
+    post:
+      operationId: createCertificate
+      tags: [certificates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificateInput"
+      responses:
+        "201":
+          description: Certificate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+  /certificates/{id}:
+    get:
+      operationId: getCertificate
+      tags: [certificates]
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: Certificate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+  /public/verify/{instrumentId}:
+    get:
+      operationId: verifyPublicInstrument
+      tags: [public]
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Public verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicVerification"
+        "404":
+          description: Not found
+  /feedback:
+    get:
+      operationId: listFeedback
+      tags: [feedback]
+      responses:
+        "200":
+          description: Feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+    post:
+      operationId: createFeedback
+      tags: [feedback]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInput"
+      responses:
+        "201":
+          description: Feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+  /risk:
+    get:
+      operationId: listRiskSignals
+      tags: [risk]
+      responses:
+        "200":
+          description: Risk signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskSignal"
+  /risk/{instrumentId}:
+    get:
+      operationId: getRiskSignal
+      tags: [risk]
+      parameters:
+        - name: instrumentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Risk signal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskSignal"
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
 components:
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      schema: { type: string }
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1 }
+    RegisterInput:
+      type: object
+      required: [name, email, password, businessName]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        businessName: { type: string }
+        phone: { type: string }
+    Session:
+      type: object
+      required: [user, token]
+      properties:
+        token: { type: string }
+        user:
+          $ref: "#/components/schemas/User"
+    User:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string }
+        phone: { type: ["string", "null"] }
+    BusinessDashboard:
+      type: object
+      required: [metrics, recentApplications, expiring]
+      properties:
+        metrics:
+          $ref: "#/components/schemas/Metrics"
+        recentApplications:
+          type: array
+          items: { $ref: "#/components/schemas/Application" }
+        expiring:
+          type: array
+          items: { $ref: "#/components/schemas/Instrument" }
+    LmoDashboard:
+      type: object
+      required: [metrics, assignedInspections, offlineQueue]
+      properties:
+        metrics:
+          $ref: "#/components/schemas/Metrics"
+        assignedInspections:
+          type: array
+          items: { $ref: "#/components/schemas/Inspection" }
+        offlineQueue: { type: integer }
+    AdminDashboard:
+      type: object
+      required: [metrics, statusBreakdown, districtBreakdown, recentInspections, riskBreakdown]
+      properties:
+        metrics:
+          $ref: "#/components/schemas/Metrics"
+        statusBreakdown:
+          type: array
+          items: { $ref: "#/components/schemas/CountItem" }
+        districtBreakdown:
+          type: array
+          items: { $ref: "#/components/schemas/CountItem" }
+        recentInspections:
+          type: array
+          items: { $ref: "#/components/schemas/Inspection" }
+        riskBreakdown:
+          type: array
+          items: { $ref: "#/components/schemas/CountItem" }
+    Metrics:
+      type: object
+      required: [totalInstruments, verified, pending, expired, highPriority, inspectionsDue]
+      properties:
+        totalInstruments: { type: integer }
+        verified: { type: integer }
+        pending: { type: integer }
+        expired: { type: integer }
+        highPriority: { type: integer }
+        inspectionsDue: { type: integer }
+    CountItem:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: integer }
+    Instrument:
+      type: object
+      required: [id, instrumentId, businessName, instrumentType, manufacturer, model, serialNumber, capacity, accuracyClass, location, district, status]
+      properties:
+        id: { type: integer }
+        instrumentId: { type: string }
+        businessName: { type: string }
+        instrumentType: { type: string }
+        manufacturer: { type: string }
+        model: { type: string }
+        serialNumber: { type: string }
+        capacity: { type: string }
+        accuracyClass: { type: string }
+        location: { type: string }
+        district: { type: string }
+        state: { type: string }
+        status: { type: string }
+        verificationDate: { type: ["string", "null"] }
+        expiryDate: { type: ["string", "null"] }
+        qrToken: { type: ["string", "null"] }
+    InstrumentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Instrument"
+        - type: object
+          required: [applications, inspections, certificates, timeline]
+          properties:
+            applications:
+              type: array
+              items: { $ref: "#/components/schemas/Application" }
+            inspections:
+              type: array
+              items: { $ref: "#/components/schemas/Inspection" }
+            certificates:
+              type: array
+              items: { $ref: "#/components/schemas/Certificate" }
+            timeline:
+              type: array
+              items: { type: string }
+    InstrumentInput:
+      type: object
+      required: [businessName, instrumentType, manufacturer, model, serialNumber, capacity, accuracyClass, location, state, district]
+      properties:
+        businessName: { type: string }
+        instrumentType: { type: string }
+        manufacturer: { type: string }
+        model: { type: string }
+        serialNumber: { type: string }
+        capacity: { type: string }
+        accuracyClass: { type: string }
+        location: { type: string }
+        state: { type: string }
+        district: { type: string }
+        installationDate: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+    InstrumentUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        location: { type: string }
+        expiryDate: { type: ["string", "null"] }
+    Application:
+      type: object
+      required: [id, applicationNumber, instrumentId, instrumentCode, businessName, date, status, assignedOfficer, inspectionDate, certificateStatus]
+      properties:
+        id: { type: integer }
+        applicationNumber: { type: string }
+        instrumentId: { type: integer }
+        instrumentCode: { type: string }
+        businessName: { type: string }
+        date: { type: string }
+        status: { type: string }
+        assignedOfficer: { type: ["string", "null"] }
+        inspectionDate: { type: ["string", "null"] }
+        certificateStatus: { type: string }
+    ApplicationInput:
+      type: object
+      required: [instrumentId]
+      properties:
+        instrumentId: { type: integer }
+        assignedOfficerId: { type: ["integer", "null"] }
+        inspectionDate: { type: ["string", "null"] }
+    ApplicationUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        assignedOfficerId: { type: ["integer", "null"] }
+        inspectionDate: { type: ["string", "null"] }
+    Inspection:
+      type: object
+      required: [id, instrumentId, instrumentCode, businessName, instrumentType, district, inspectionDate, priority, result, observations, gpsVerified, syncStatus]
+      properties:
+        id: { type: integer }
+        instrumentId: { type: integer }
+        instrumentCode: { type: string }
+        businessName: { type: string }
+        instrumentType: { type: string }
+        district: { type: string }
+        inspectionDate: { type: string }
+        priority: { type: string }
+        result: { type: string }
+        observations: { type: string }
+        gpsVerified: { type: boolean }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+        syncStatus: { type: string }
+        ocrMismatch: { type: boolean }
+    InspectionInput:
+      type: object
+      required: [instrumentId, result, observations, gpsVerified]
+      properties:
+        instrumentId: { type: integer }
+        result: { type: string }
+        observations: { type: string }
+        gpsVerified: { type: boolean }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+        ocrData: { type: ["string", "null"] }
+        syncStatus: { type: string }
+    InspectionUpdate:
+      type: object
+      properties:
+        result: { type: string }
+        observations: { type: string }
+        gpsVerified: { type: boolean }
+        syncStatus: { type: string }
+        ocrData: { type: ["string", "null"] }
+    OcrInput:
+      type: object
+      required: [instrumentId]
+      properties:
+        instrumentId: { type: integer }
+        imageName: { type: ["string", "null"] }
+    OcrResult:
+      type: object
+      required: [manufacturer, model, serialNumber, capacity, accuracyClass, confidence, mismatchDetected]
+      properties:
+        manufacturer: { type: string }
+        model: { type: string }
+        serialNumber: { type: string }
+        capacity: { type: string }
+        accuracyClass: { type: string }
+        confidence: { type: number }
+        mismatchDetected: { type: boolean }
+    Certificate:
+      type: object
+      required: [id, instrumentId, instrumentCode, certificateNumber, issueDate, expiryDate, status, verificationHash]
+      properties:
+        id: { type: integer }
+        instrumentId: { type: integer }
+        instrumentCode: { type: string }
+        certificateNumber: { type: string }
+        issueDate: { type: string }
+        expiryDate: { type: string }
+        status: { type: string }
+        verificationHash: { type: string }
+    CertificateInput:
+      type: object
+      required: [instrumentId, inspectionId]
+      properties:
+        instrumentId: { type: integer }
+        inspectionId: { type: integer }
+    PublicVerification:
+      type: object
+      required: [instrument, certificate, status, history]
+      properties:
+        instrument: { $ref: "#/components/schemas/Instrument" }
+        certificate:
+          anyOf:
+            - $ref: "#/components/schemas/Certificate"
+            - type: "null"
+        status: { type: string }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/Inspection" }
+    Feedback:
+      type: object
+      required: [id, instrumentId, instrumentCode, category, message, createdAt]
+      properties:
+        id: { type: integer }
+        instrumentId: { type: integer }
+        instrumentCode: { type: string }
+        category: { type: string }
+        message: { type: string }
+        createdAt: { type: string }
+    FeedbackInput:
+      type: object
+      required: [instrumentId, category, message]
+      properties:
+        instrumentId: { type: integer }
+        category: { type: string }
+        message: { type: string }
+    RiskSignal:
+      type: object
+      required: [id, instrumentId, instrumentCode, businessName, score, level, reasons, calculatedAt]
+      properties:
+        id: { type: integer }
+        instrumentId: { type: integer }
+        instrumentCode: { type: string }
+        businessName: { type: string }
+        score: { type: integer }
+        level: { type: string }
+        reasons:
+          type: array
+          items: { type: string }
+        calculatedAt: { type: string }
+    AuditLog:
+      type: object
+      required: [id, user, action, entity, timestamp]
+      properties:
+        id: { type: integer }
+        user: { type: string }
+        action: { type: string }
+        entity: { type: string }
+        timestamp: { type: string }
